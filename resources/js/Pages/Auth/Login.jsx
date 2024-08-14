@@ -5,19 +5,22 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
+import CaptchaInput from "@/Components/CaptchaInput.jsx";
+import {useState} from "react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
+        captcha: '', // 增加 captcha 字段
     });
 
     const submit = (e) => {
         e.preventDefault();
 
         post(route('login'), {
-            onFinish: () => reset('password'),
+            onFinish: () => reset('password', 'captcha'),
         });
     };
 
@@ -60,6 +63,15 @@ export default function Login({ status, canResetPassword }) {
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
+
+                {/* 添加验证码输入框 */}
+                <CaptchaInput
+                    id="captcha"
+                    name="captcha"
+                    value={data.captcha}
+                    onChange={(e) => setData('captcha', e.target.value)}
+                    error={errors.captcha}
+                />
 
                 <div className="block mt-4">
                     <label className="flex items-center">

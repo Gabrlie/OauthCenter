@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\CheckedClient;
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Client;
-use Laravel\Passport\ClientRepository;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Token;
 
 class ClientController extends Controller
@@ -73,7 +73,6 @@ class ClientController extends Controller
         $request->validate([
             'name' => 'required',
             'redirect' => 'required|url',
-            'notes' => 'string',
         ]);
 
         if ($request->notes) {
@@ -257,13 +256,12 @@ class ClientController extends Controller
 
     public function index(Request $request)
     {
-        $tokens = $request->user()->tokens->load('client');
+        $tokens = $request->user()->tokens()->with('client')->where('revoked', false)
+            ->get()->filter(function ($token) {
+                return !str_contains($token->client->name, 'Laravel') && !$token->client->personal_access_client;
+            })->values();
 
-        return view('dashboard.oauth-applications', [
-            'tokens' => $tokens->filter(function ($token) {
-                return $token->client->name !== 'Laravel Personal Access Client';
-            }),
-        ]);
+        return response()->json($tokens);
     }
 
     public function revoke($tokenId)

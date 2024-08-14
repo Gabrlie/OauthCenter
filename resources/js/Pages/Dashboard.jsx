@@ -1,61 +1,85 @@
 import React, { useEffect, useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import axios from 'axios';
 
-export default function Dashboard({ auth }) {
-    const [applications, setApplications] = useState([]);
+export default function Dashboard() {
+    const { auth } = usePage().props; // 获取用户信息
+    const [tokens, setTokens] = useState([]);
+    const [status, setStatus] = useState('');
 
     useEffect(() => {
-        // Fetch the authorized applications
-        axios.get('/api/oauth-applications')
-            .then(response => setApplications(response.data.tokens))
-            .catch(error => console.error('Error fetching applications:', error));
+        // 获取已授权的应用
+        axios.get('/api/tokens').then((response) => {
+            setTokens(response.data);
+        });
     }, []);
 
-    const revokeAuthorization = (tokenId) => {
-        if (!confirm('确定要撤销该应用的授权吗？')) return;
-
-        axios.delete(`/api/oauth-applications/${tokenId}`)
-            .then(response => {
-                alert(response.data.status);
-                setApplications(applications.filter(app => app.id !== tokenId));
+    const revokeToken = (id) => {
+        axios.post(`/oauth/tokens/revoke/${id}`, {
+            _method: 'POST',
+            _token: auth.csrf_token,
+        })
+            .then(() => {
+                setStatus('授权已撤销');
+                setTokens(tokens.filter((token) => token.id !== id));
             })
-            .catch(error => console.error('Error revoking authorization:', error));
+            .catch((error) => {
+                console.error('撤销授权时出错:', error);
+            });
     };
 
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">授权管理</h2>}
+            header={<h2 className="font-semibold text-2xl text-gray-800">授权管理</h2>}
         >
             <Head title="授权管理" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">已授权的第三方应用</h3>
-                            <ul>
-                                {applications.map((app) => (
-                                    <li key={app.id} className="mb-4 flex justify-between items-center">
-                                        <div>
-                                            <span className="font-semibold">{app.client.name}</span>
-                                            <span className="text-sm text-gray-600 ml-2">({app.created_at})</span>
-                                        </div>
-                                        <button
-                                            className="text-red-600 hover:text-red-900"
-                                            onClick={() => revokeAuthorization(app.id)}
-                                        >
-                                            撤销授权
-                                        </button>
-                                    </li>
+            <div className="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+                <div className="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                    <div className="px-6 py-4 bg-gray-100 border-b border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900">已授权的应用</h3>
+                    </div>
+
+                    <div className="px-6 py-4">
+                        {status && (
+                            <div className="mb-4 p-4 bg-green-100 text-green-800 rounded">
+                                {status}
+                            </div>
+                        )}
+
+                        {tokens.length === 0 ? (
+                            <p className="text-gray-600">您还没有授权任何应用。</p>
+                        ) : (
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                <tr>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">应用名称</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">最后使用时间</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                {tokens.map((token) => (
+                                    <tr key={token.id}>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{token.client.name}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                                            {token.last_used_at ? token.last_used_at : '从未使用'}
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap">
+                                            <button
+                                                onClick={() => revokeToken(token.id)}
+                                                className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
+                                            >
+                                                撤销授权
+                                            </button>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </ul>
-                            {applications.length === 0 && (
-                                <p className="text-gray-600">当前没有已授权的应用。</p>
-                            )}
-                        </div>
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>

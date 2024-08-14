@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ClientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +35,9 @@ Route::group(['prefix' => 'check/client', 'namespace' => 'App\Http\Controllers\A
         Route::post('/list', 'ClientController@checkList');
         Route::post('/update', 'ClientController@checkUpdate');
     });
+});
+
+Route::middleware(['myAuth'])->group(function () {
+    Route::get('/oauth-applications', [ClientController::class, 'index'])->name('api.oauth.applications');
+    Route::delete('/oauth-applications/{tokenId}', [ClientController::class, 'revoke'])->name('api.oauth.applications.revoke');
 });

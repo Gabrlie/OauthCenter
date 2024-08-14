@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ClientController;
+use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,9 +26,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard/oauth-applications', [ClientController::class, 'index'])->name('oauth.applications');
-    Route::delete('/dashboard/oauth-applications/{tokenId}', [ClientController::class, 'revoke'])->name('oauth.applications.revoke');
+Route::get('/captcha-image', [CaptchaController::class, 'generateCaptcha'])->name('captcha');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/api/tokens', [ClientController::class, 'index']);
+    Route::post('/oauth/tokens/revoke/{token}', [ClientController::class, 'revoke'])->name('oauth.tokens.revoke');
 });
 
 require __DIR__.'/auth.php';

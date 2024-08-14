@@ -4,6 +4,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
+import CaptchaInput from "@/Components/CaptchaInput.jsx";
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -11,6 +12,7 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        captcha: '', // 增加 captcha 字段
     });
 
     const submit = (e) => {
@@ -93,6 +95,15 @@ export default function Register() {
 
                     <InputError message={errors.password_confirmation} className="mt-2" />
                 </div>
+
+                {/* 添加验证码输入框 */}
+                <CaptchaInput
+                    id="captcha"
+                    name="captcha"
+                    value={data.captcha}
+                    onChange={(e) => setData('captcha', e.target.value)}
+                    error={errors.captcha}
+                />
 
                 <div className="flex items-center justify-end mt-4">
                     <Link
