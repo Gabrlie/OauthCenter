@@ -37,4 +37,5 @@ services:
             - ./nginx:/var/log/nginx
         ports:
             - "80:80"
+            - "443:443"
 
