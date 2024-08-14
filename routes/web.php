@@ -26,8 +26,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/captcha-image', [CaptchaController::class, 'generateCaptcha'])->name('captcha');
-
 Route::middleware('auth')->group(function () {
     Route::get('/api/tokens', [ClientController::class, 'index']);
     Route::post('/oauth/tokens/revoke/{token}', [ClientController::class, 'revoke'])->name('oauth.tokens.revoke');

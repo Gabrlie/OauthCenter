@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ClientController;
+use App\Http\Controllers\CaptchaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -9,7 +10,7 @@ Route::group(['prefix' => 'user', 'namespace' => 'App\Http\Controllers'], functi
     Route::middleware('auth:api')->get('/', function (Request $request) {
         return $request->user();
     });
-    Route::post('/login', 'UserController@login');
+    Route::post('/login', 'UserController@login')->middleware('verify.captcha');
     Route::middleware('developerAuth')->group(function () {
         Route::post('/logout', 'UserController@logout');
         Route::post('/info', 'UserController@info');
@@ -41,3 +42,6 @@ Route::middleware(['myAuth'])->group(function () {
     Route::get('/oauth-applications', [ClientController::class, 'index'])->name('api.oauth.applications');
     Route::delete('/oauth-applications/{tokenId}', [ClientController::class, 'revoke'])->name('api.oauth.applications.revoke');
 });
+
+// 验证码
+Route::get('/captcha', [CaptchaController::class, 'generateCaptcha'])->name('captcha');
