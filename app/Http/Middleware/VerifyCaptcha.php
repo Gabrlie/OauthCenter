@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,18 +13,21 @@ class VerifyCaptcha
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next)
     {
-        // 从 session 中获取验证码
-        $captchaPhrase = Session::get('captchaPhrase');
+        $token = $request->input('token');
+        $captcha_code = $request->input('captcha');
 
-        // 验证请求中的验证码是否正确
-        if (strcasecmp($captchaPhrase, $request->input('captcha')) !== 0) {
-            return back()->withErrors(['captcha' => '验证码错误，请重新输入。']);
+        // 从缓存中获取验证码并验证
+        if ($token && $captcha_code && strtolower(Cache::get($token)) === strtolower($captcha_code)) {
+            // 验证成功后，删除缓存中的验证码
+            Cache::forget($token);
+
+            return $next($request);
         }
 
-        return $next($request);
+        return response()->json(['error' => '验证码过期'], 422);
     }
 }

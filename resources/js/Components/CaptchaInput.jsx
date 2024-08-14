@@ -1,33 +1,55 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import TextInput from '@/Components/TextInput';
+import InputLabel from '@/Components/InputLabel';
+import InputError from '@/Components/InputError';
+import axios from 'axios';
 
-export default function CaptchaInput({ id, name, value, onChange, error }) {
-    const [captchaSrc, setCaptchaSrc] = useState(route('captcha') + '?' + Date.now());
+export default function CaptchaInput({ value, onChange, error, setToken }) {
+    const [captchaImage, setCaptchaImage] = useState('');
 
-    const refreshCaptcha = () => {
-        setCaptchaSrc(route('captcha') + '?' + Date.now());
+    const generateToken = () => {
+        return Math.random().toString(36).substr(2);
     };
+
+    const fetchCaptcha = () => {
+        const newToken = generateToken();
+        setToken(newToken);
+
+        axios.post('/api/captcha', { token: newToken })
+            .then(response => {
+                setCaptchaImage(response.data.captcha_image);
+            })
+            .catch(error => {
+                console.error('获取验证码失败', error);
+            });
+    };
+
+    useEffect(() => {
+        fetchCaptcha();
+    }, []);
 
     return (
         <div className="mt-4">
-            <label htmlFor={id} className="block font-medium text-sm text-gray-700">
-                验证码
-            </label>
-            <div className="flex items-center mt-1">
-                <input
-                    id={id}
-                    name={name}
+            <InputLabel htmlFor="captcha" value="验证码"/>
+
+            <div className="flex items-center">
+                <TextInput
+                    id="captcha"
+                    name="captcha"
                     value={value}
+                    className="mt-1 block w-full"
+                    autoComplete="off"
                     onChange={onChange}
-                    className="block w-full p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
                 <img
-                    src={captchaSrc}
-                    onClick={refreshCaptcha}
-                    className="ms-2 cursor-pointer p-1 rounded-md"
-                    alt="验证码"
+                    src={captchaImage}
+                    onClick={fetchCaptcha}
+                    className="ms-2 cursor-pointer"
+                    alt="点击刷新验证码"
                 />
             </div>
-            {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+
+            <InputError message={error} className="mt-2"/>
         </div>
     );
 }

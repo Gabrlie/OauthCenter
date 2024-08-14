@@ -44,4 +44,4 @@ Route::middleware(['myAuth'])->group(function () {
 });
 
 // 验证码
-Route::get('/captcha', [CaptchaController::class, 'generateCaptcha'])->name('captcha');
+Route::post('/captcha', [CaptchaController::class, 'generateCaptcha'])->name('captcha');

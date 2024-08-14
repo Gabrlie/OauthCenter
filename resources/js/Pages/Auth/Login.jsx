@@ -14,7 +14,12 @@ export default function Login({ status, canResetPassword }) {
         password: '',
         remember: false,
         captcha: '', // 增加 captcha 字段
+        token: ''
     });
+
+    const setToken = (newToken) => {
+        setData('token', newToken);
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -66,11 +71,10 @@ export default function Login({ status, canResetPassword }) {
 
                 {/* 添加验证码输入框 */}
                 <CaptchaInput
-                    id="captcha"
-                    name="captcha"
                     value={data.captcha}
                     onChange={(e) => setData('captcha', e.target.value)}
                     error={errors.captcha}
+                    setToken={setToken}
                 />
 
                 <div className="block mt-4">
