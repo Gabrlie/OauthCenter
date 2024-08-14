@@ -20,7 +20,8 @@ services:
             - ./postgres-data:/var/lib/postgresql/data
 
     php-fpm:
-        build: ./
+#        build: ./
+        image: registry.cn-chengdu.aliyuncs.com/gabrlie/php:latest
         container_name: oauth-php-fpm
         working_dir: /application
         volumes:
