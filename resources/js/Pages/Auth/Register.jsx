@@ -13,7 +13,12 @@ export default function Register() {
         password: '',
         password_confirmation: '',
         captcha: '', // 增加 captcha 字段
+        token: ''
     });
+
+    const setToken = (newToken) => {
+        setData('token', newToken);
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -98,11 +103,10 @@ export default function Register() {
 
                 {/* 添加验证码输入框 */}
                 <CaptchaInput
-                    id="captcha"
-                    name="captcha"
                     value={data.captcha}
                     onChange={(e) => setData('captcha', e.target.value)}
                     error={errors.captcha}
+                    setToken={setToken}
                 />
 
                 <div className="flex items-center justify-end mt-4">
