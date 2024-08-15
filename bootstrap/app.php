@@ -28,6 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'myAuth' => AuthenticateApi::class,
             'verify.captcha' => VerifyCaptcha::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            '*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

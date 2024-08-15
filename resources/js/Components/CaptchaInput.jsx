@@ -17,7 +17,7 @@ export default function CaptchaInput({ value, onChange, error, setToken }) {
 
         axios.post('/api/captcha', { token: newToken })
             .then(response => {
-                setCaptchaImage(response.data.captcha_image);
+                setCaptchaImage(response.data.data.captcha);
             })
             .catch(error => {
                 console.error('获取验证码失败', error);

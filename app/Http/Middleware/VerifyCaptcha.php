@@ -27,7 +27,7 @@ class VerifyCaptcha
 
             return $next($request);
         }
-
+        dd($token, $captcha_code);
         return response()->json(['error' => '验证码过期'], 422);
     }
 }

@@ -21,7 +21,9 @@ class CaptchaController extends Controller
         Cache::put($token, $builder->getPhrase(), 300); // 验证码存储5分钟
 
         // 返回验证码图片
-        return response()->json(['captcha_image' => $builder->inline()]);
+        return $this->success([
+            'captcha' => $builder->inline(),
+        ]);
     }
 
     public function validateCaptcha(Request $request)

@@ -74,10 +74,7 @@ class GitHubAuthController extends Controller
 
         $user = User::updateOrCreate(
             ['email' => $githubEmail],
-            [
-                'name' => $githubUser['login'],
-                'password' => bcrypt($randomPassword),
-            ]
+            ['name' => $githubUser['login'],]
         );
 
         $user->avatar = $githubUser['avatar_url'];
