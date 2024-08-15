@@ -10,7 +10,7 @@ Route::group(['prefix' => 'user', 'namespace' => 'App\Http\Controllers'], functi
     Route::middleware('auth:api')->get('/', function (Request $request) {
         return $request->user();
     });
-    Route::post('/login', 'UserController@login')->middleware('verify.captcha');
+    Route::post('/login', 'UserController@login');
     Route::middleware('developerAuth')->group(function () {
         Route::post('/logout', 'UserController@logout');
         Route::post('/info', 'UserController@info');

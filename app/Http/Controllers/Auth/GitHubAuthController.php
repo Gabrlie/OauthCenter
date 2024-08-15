@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class GitHubAuthController extends Controller
 {
@@ -35,7 +37,7 @@ class GitHubAuthController extends Controller
 
     public function handleProviderCallback(Request $request){
 
-        $callbackUrl = 'http://127.0.0.1:8000/user/login';
+        $callbackUrl = 'https://api.gabrlie.top/login';
 
         $client = new \GuzzleHttp\Client();
 
@@ -44,7 +46,7 @@ class GitHubAuthController extends Controller
 
             $decodedString = urldecode($response->getBody()->getContents());
             parse_str($decodedString, $data);
-
+     
             // 如果返回值包含error_description字段，说明授权失败，输出错误信息并返回
             if (isset($data['error_description'])) {
                 return redirect($callbackUrl.'?error='.$data['error_description']);
@@ -67,14 +69,22 @@ class GitHubAuthController extends Controller
         $githubUser = $userResponse->json();
         $githubEmail = collect($emailResponse->json())->firstWhere('primary', true)['email'];
 
+        // 生成随机密码
+        $randomPassword = Str::random(12);
+
         $user = User::updateOrCreate(
             ['email' => $githubEmail],
-            ['name' => $githubUser['login']],
+            [
+                'name' => $githubUser['login'],
+                'password' => bcrypt($randomPassword),
+            ]
         );
 
         $user->avatar = $githubUser['avatar_url'];
         $user->save();
 
-        return redirect($callbackUrl.'?token='.$user->createToken('token')->accessToken.'&id='.$user->id);
-        }
+        auth()->login($user);
+
+        return redirect('/');
+    }
 }

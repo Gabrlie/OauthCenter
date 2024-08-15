@@ -6,7 +6,8 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import CaptchaInput from "@/Components/CaptchaInput.jsx";
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import { message } from 'antd';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -23,11 +24,37 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-
         post(route('login'), {
             onFinish: () => reset('password', 'captcha'),
         });
     };
+
+    // 第三方登录
+    const handleGithubLogin = () => {
+        window.location.href = 'https://api.gabrlie.top/auth/github';
+    }
+
+    // 第三方登录回调
+    const LoginCallback = async () => {
+        const error = new URLSearchParams(location.search).get('error');
+        if (error) {
+            message.error(error);
+        }
+        const token = new URLSearchParams(location.search).get('token');
+        const id = new URLSearchParams(location.search).get('id');
+        if (token && id) {
+            console.log('登录成功',new URLSearchParams(location.search));
+            cookie.save('token', token, {path: '/'});
+            cookie.save('id', id, {path: '/'});
+            message.success('登录成功');
+            // 如果成功，跳转到首页
+            history.push('/');
+        }
+    }
+
+    useEffect(() => {
+        LoginCallback();
+    }, [location, history]);
 
     return (
         <GuestLayout>
@@ -103,6 +130,16 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+
+            {/* 第三方登录按钮 */}
+            <div className="flex items-center justify-center mt-6">
+                <button
+                    onClick={handleGithubLogin}
+                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:ring focus:ring-gray-300 active:bg-gray-900 disabled:opacity-25 transition"
+                >
+                    使用 GitHub 登录
+                </button>
+            </div>
         </GuestLayout>
     );
 }

@@ -31,4 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/oauth/tokens/revoke/{token}', [ClientController::class, 'revoke'])->name('oauth.tokens.revoke');
 });
 
+// 第三方登录
+Route::group(['prefix' => 'auth'], function () {
+    Route::get('/github', 'App\Http\Controllers\Auth\GitHubAuthController@redirectToProvider');
+    Route::get('/github/callback', 'App\Http\Controllers\Auth\GitHubAuthController@handleProviderCallback');
+});
+
 require __DIR__.'/auth.php';
