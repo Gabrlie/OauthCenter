@@ -1,0 +1,1 @@
+import{r as o,j as r}from"./app-Bj1kdrrQ.js";function n({auth:e,laravelVersion:s,phpVersion:t}){return o.useEffect(()=>{window.location.href=e.user?"/dashboard":"/login"}),r.jsx(r.Fragment,{})}export{n as default};
